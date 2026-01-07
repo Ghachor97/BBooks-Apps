@@ -8,6 +8,7 @@ import com.galang.bbooks.data.Transaction
 import com.galang.bbooks.data.repository.BookRepository
 import com.galang.bbooks.data.repository.TransactionRepository
 import com.galang.bbooks.data.repository.UserRepository
+import com.galang.bbooks.data.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,8 @@ import java.util.concurrent.TimeUnit
 data class TransactionWithBook(
     val transaction: Transaction,
     val book: Book,
-    val fineEstimate: Double
+    val fineEstimate: Double,
+    val borrowerName: String? = null
 )
 
 class ReturnBookViewModel(
@@ -31,37 +33,65 @@ class ReturnBookViewModel(
     private val _currentUser = userRepository.currentUser
     
     val activeTransactions: StateFlow<List<TransactionWithBook>> = combine(
-        transactionRepository.getTransactionsByUser(_currentUser?.id ?: -1),
-        bookRepository.allBooks
-    ) { transactions, books ->
+        if (_currentUser?.role == "admin") transactionRepository.getAllTransactions() else transactionRepository.getTransactionsByUser(_currentUser?.id ?: -1),
+        bookRepository.allBooks,
+        userRepository.allUsers
+    ) { transactions: List<Transaction>, books: List<Book>, users: List<User> ->
         transactions.filter { it.status == "borrowed" }.mapNotNull { transaction ->
             val book = books.find { it.id == transaction.bookId } ?: return@mapNotNull null
             val fine = calculateFine(transaction.dueDate)
-            TransactionWithBook(transaction, book, fine)
+            val borrower = users.find { it.id == transaction.userId }
+            TransactionWithBook(transaction, book, fine, borrower?.fullName)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _returnState = MutableStateFlow<BorrowState>(BorrowState.Idle)
     val returnState = _returnState
 
-    fun returnBook(item: TransactionWithBook) {
+    companion object {
+        const val FINE_RUSAK = 100000.0
+        const val FINE_HILANG = 150000.0
+        const val FINE_ROBEK = 50000.0
+    }
+
+    fun returnBook(item: TransactionWithBook, condition: String = "Baik") {
         viewModelScope.launch {
             _returnState.value = BorrowState.Loading
             try {
+                // Calculate Condition Fine
+                val conditionFine = when (condition) {
+                    "Rusak" -> FINE_RUSAK
+                    "Hilang" -> FINE_HILANG
+                    "Robek" -> FINE_ROBEK
+                    else -> 0.0
+                }
+
+                // Total Fine = Overdue Fine + Condition Fine
+                val totalFine = item.fineEstimate + conditionFine
+
                 // 1. Update Transaction
                 val now = System.currentTimeMillis()
                 val updatedTransaction = item.transaction.copy(
                     returnDate = now,
                     status = "returned",
-                    fine = item.fineEstimate
+                    fine = totalFine,
+                    returnCondition = condition
                 )
                 transactionRepository.returnBook(updatedTransaction)
 
-                // 2. Update Book Stock
-                val updatedBook = item.book.copy(stock = item.book.stock + 1)
-                bookRepository.updateBook(updatedBook)
+                // 2. Update Book Stock (Only if NOT 'Hilang')
+                if (condition != "Hilang") {
+                    val updatedBook = item.book.copy(stock = item.book.stock + 1)
+                    bookRepository.updateBook(updatedBook)
+                }
 
-                _returnState.value = BorrowState.Success("Buku berhasil dikembalikan. Denda: Rp ${item.fineEstimate.toInt()}")
+                val message = if (totalFine > 0) {
+                     "Buku dikembalikan dengan status $condition.\nTotal Denda: Rp ${totalFine.toInt()}\nHarap lakukan pembayaran!"
+                } else {
+                     "Buku berhasil dikembalikan. Status: $condition."
+                }
+
+                _returnState.value = BorrowState.Success(message)
             } catch (e: Exception) {
                 _returnState.value = BorrowState.Error("Gagal mengembalikan buku: ${e.message}")
             }

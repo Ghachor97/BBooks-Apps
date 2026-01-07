@@ -32,5 +32,6 @@ data class Transaction(
     val returnDate: Long? = null,
     val dueDate: Long,
     val status: String, // "borrowed", "returned"
-    val fine: Double = 0.0
+    val fine: Double = 0.0,
+    val returnCondition: String? = null // "Baik", "Rusak", "Hilang", "Robek"
 )
