@@ -1,5 +1,6 @@
 package com.galang.bbooks.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,17 +12,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -49,10 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.galang.bbooks.BBooksApplication
-import com.galang.bbooks.ui.theme.DeepBlue
-import com.galang.bbooks.ui.theme.PastelBlue
-import com.galang.bbooks.ui.theme.SoftBlue
-import com.galang.bbooks.ui.theme.SoftCoral
+import com.galang.bbooks.ui.components.LiquidGlassCard
+import com.galang.bbooks.ui.theme.*
 import com.galang.bbooks.ui.viewmodel.RegisterViewModel
 import com.galang.bbooks.ui.viewmodel.RegisterViewModelFactory
 
@@ -70,178 +71,257 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = Color.Transparent,
+        containerColor = DarkBackground,
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(PastelBlue),
+                .background(DarkBackground),
             contentAlignment = Alignment.Center
         ) {
-            // Deco Circles
+            // Decorative Background Circles
+            Box(
+                modifier = Modifier
+                    .size(280.dp)
+                    .offset(x = 150.dp, y = (-200).dp)
+                    .clip(CircleShape)
+                    .background(BlueAccent.copy(alpha = 0.1f))
+            )
             Box(
                 modifier = Modifier
                     .size(200.dp)
-                    .offset(x = (-80).dp, y = (-200).dp)
+                    .offset(x = (-120).dp, y = (-150).dp)
                     .clip(CircleShape)
-                    .background(SoftCoral.copy(alpha = 0.2f))
+                    .background(PurpleAccent.copy(alpha = 0.08f))
             )
             Box(
                 modifier = Modifier
-                    .size(150.dp)
-                    .offset(x = 100.dp, y = (-250).dp)
+                    .size(220.dp)
+                    .offset(x = (-80).dp, y = 350.dp)
                     .clip(CircleShape)
-                    .background(SoftBlue.copy(alpha = 0.2f))
-            )
-             Box(
-                modifier = Modifier
-                    .size(250.dp)
-                    .offset(x = 120.dp, y = 200.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.3f))
+                    .background(BlueAccent.copy(alpha = 0.06f))
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
+                    .verticalScroll(rememberScrollState())
                     .padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "Create Account",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 32.sp
-                    ),
-                    color = DeepBlue
-                )
-                Text(
-                    text = "Join our reading community!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = DeepBlue.copy(alpha = 0.7f)
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Full Name
-                OutlinedTextField(
-                    value = viewModel.fullName,
-                    onValueChange = { viewModel.fullName = it },
-                    label = { Text("Full Name") },
-                    leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null, tint = SoftBlue) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = SoftBlue,
-                        unfocusedBorderColor = Color.White,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.8f)
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Username
-                OutlinedTextField(
-                    value = viewModel.username,
-                    onValueChange = { viewModel.username = it },
-                    label = { Text("Username") },
-                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = SoftBlue) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = SoftBlue,
-                        unfocusedBorderColor = Color.White,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.8f)
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Password
-                OutlinedTextField(
-                    value = viewModel.password,
-                    onValueChange = { viewModel.password = it },
-                    label = { Text("Password") },
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = SoftBlue) },
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                                tint = SoftBlue
+                // Icon with Gradient Background
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(BlueAccent, PurpleAccent)
                             )
-                        }
-                    },
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = SoftBlue,
-                        unfocusedBorderColor = Color.White,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.8f)
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (viewModel.error != null) {
-                    Text(
-                        text = viewModel.error ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(id = com.galang.bbooks.R.drawable.app_logo),
+                        contentDescription = "App Logo",
+                        modifier = Modifier.size(60.dp).clip(CircleShape)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Button(
-                    onClick = { viewModel.register(onRegisterSuccess) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = !viewModel.isLoading,
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SoftBlue,
-                        contentColor = Color.White
+                Text(
+                    text = "Buat Akun",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 32.sp
                     ),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 6.dp,
-                        pressedElevation = 2.dp
-                    )
+                    color = TextPrimary
+                )
+                Text(
+                    text = "Bergabung dengan komunitas pembaca kami!",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = TextSecondary
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Register Form Card
+                LiquidGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    cornerRadius = 24.dp
                 ) {
-                    if (viewModel.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = Color.White
+                    Column(
+                        modifier = Modifier.padding(24.dp)
+                    ) {
+                        // Full Name Field
+                        OutlinedTextField(
+                            value = viewModel.fullName,
+                            onValueChange = { viewModel.fullName = it },
+                            label = { Text("Nama Lengkap", color = TextSecondary) },
+                            leadingIcon = { 
+                                Icon(
+                                    Icons.Default.Badge, 
+                                    contentDescription = null, 
+                                    tint = PurpleAccent
+                                ) 
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PurpleAccent,
+                                unfocusedBorderColor = GlassBorder,
+                                focusedContainerColor = GlassWhite,
+                                unfocusedContainerColor = GlassWhite,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                cursorColor = PurpleAccent,
+                                focusedLabelColor = PurpleAccent,
+                                unfocusedLabelColor = TextTertiary
+                            )
                         )
-                    } else {
-                        Text(
-                            text = "Sign Up",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Username Field
+                        OutlinedTextField(
+                            value = viewModel.username,
+                            onValueChange = { viewModel.username = it },
+                            label = { Text("Nama Pengguna", color = TextSecondary) },
+                            leadingIcon = { 
+                                Icon(
+                                    Icons.Default.Person, 
+                                    contentDescription = null, 
+                                    tint = PurpleAccent
+                                ) 
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PurpleAccent,
+                                unfocusedBorderColor = GlassBorder,
+                                focusedContainerColor = GlassWhite,
+                                unfocusedContainerColor = GlassWhite,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                cursorColor = PurpleAccent,
+                                focusedLabelColor = PurpleAccent,
+                                unfocusedLabelColor = TextTertiary
+                            )
                         )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Password Field
+                        OutlinedTextField(
+                            value = viewModel.password,
+                            onValueChange = { viewModel.password = it },
+                            label = { Text("Kata Sandi", color = TextSecondary) },
+                            leadingIcon = { 
+                                Icon(
+                                    Icons.Default.Lock, 
+                                    contentDescription = null, 
+                                    tint = PurpleAccent
+                                ) 
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                        contentDescription = if (passwordVisible) "Sembunyikan kata sandi" else "Tampilkan kata sandi",
+                                        tint = TextTertiary
+                                    )
+                                }
+                            },
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PurpleAccent,
+                                unfocusedBorderColor = GlassBorder,
+                                focusedContainerColor = GlassWhite,
+                                unfocusedContainerColor = GlassWhite,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                cursorColor = PurpleAccent,
+                                focusedLabelColor = PurpleAccent,
+                                unfocusedLabelColor = TextTertiary
+                            )
+                        )
+
+                        AnimatedVisibility(visible = viewModel.error != null) {
+                            Text(
+                                text = viewModel.error ?: "",
+                                color = StatusRed,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Register Button
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(28.dp))
+                                .background(
+                                    brush = Brush.horizontalGradient(
+                                        colors = if (!viewModel.isLoading) {
+                                            listOf(BlueAccent, PurpleAccent)
+                                        } else {
+                                            listOf(TextDisabled, TextDisabled)
+                                        }
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (viewModel.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = Color.White
+                                )
+                            } else {
+                                TextButton(
+                                    onClick = { viewModel.register(onRegisterSuccess) },
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Text(
+                                        text = "Daftar",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 
                 TextButton(onClick = onLoginClick) {
                     Text(
-                        text = "Already have an account? Login",
-                        color = DeepBlue
+                        text = "Sudah punya akun? ",
+                        color = TextSecondary
+                    )
+                    Text(
+                        text = "Masuk",
+                        color = PurpleAccent,
+                        fontWeight = FontWeight.Bold
                     )
                 }
+                
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

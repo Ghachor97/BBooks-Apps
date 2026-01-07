@@ -1,22 +1,33 @@
 package com.galang.bbooks.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,11 +38,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.galang.bbooks.BBooksApplication
+import com.galang.bbooks.ui.components.DeadlineProgressBar
+import com.galang.bbooks.ui.components.LiquidGlassBookCard
+import com.galang.bbooks.ui.components.LiquidGlassButton
+import com.galang.bbooks.ui.components.LiquidGlassCard
+import com.galang.bbooks.ui.components.LiquidGlassSummaryCard
+import com.galang.bbooks.ui.components.StatusBadge
+import com.galang.bbooks.ui.theme.*
 import com.galang.bbooks.ui.viewmodel.BorrowState
 import com.galang.bbooks.ui.viewmodel.ReturnBookViewModel
 import com.galang.bbooks.ui.viewmodel.ReturnBookViewModelFactory
@@ -39,6 +60,7 @@ import com.galang.bbooks.ui.viewmodel.TransactionWithBook
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun ReturnBookScreen() {
@@ -55,40 +77,204 @@ fun ReturnBookScreen() {
     val transactions by viewModel.activeTransactions.collectAsState()
     val borrowState by viewModel.returnState.collectAsState()
     val user = app.userRepository.currentUser
+    val isAdmin = user?.role == "admin"
     
     var showConditionDialog by remember { mutableStateOf<TransactionWithBook?>(null) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            text = "Pengembalian Buku",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
+    // Calculate summary stats
+    val onTimeCount = transactions.count { it.fineEstimate <= 0 }
+    val overdueCount = transactions.count { it.fineEstimate > 0 }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DarkBackground)
+    ) {
+        // Decorative background
+        Box(
+            modifier = Modifier
+                .size(280.dp)
+                .offset(x = 180.dp, y = (-60).dp)
+                .clip(CircleShape)
+                .background(PurpleAccent.copy(alpha = 0.07f))
+        )
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .offset(x = (-70).dp, y = 500.dp)
+                .clip(CircleShape)
+                .background(BlueAccent.copy(alpha = 0.05f))
         )
 
-        if (transactions.isEmpty()) {
-            Text("Tidak ada buku yang sedang dipinjam.")
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        ) {
+            // Header
+            Text(
+                text = "Pengembalian Buku",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                color = TextPrimary,
+                modifier = Modifier.padding(bottom = 20.dp)
+            )
+
+            // Summary Card
+            LiquidGlassCard(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                items(transactions) { item ->
-                    ReturnItemCard(
-                        item = item,
-                        isAdmin = user?.role == "admin",
-                        onReturnClick = {
-                             if (user?.role == "admin") {
-                                 showConditionDialog = item
-                             } else {
-                                 viewModel.returnBook(item) // Standard return for user
-                             }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Circular indicator
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(
+                                brush = Brush.sweepGradient(
+                                    colors = listOf(
+                                        PurpleAccent,
+                                        BlueAccent,
+                                        PurpleAccent
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(DarkSurface),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = transactions.size.toString(),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = "Buku",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = TextSecondary
+                                )
+                            }
                         }
-                    )
+                    }
+
+                    // Stats
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = StatusGreen,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "Tepat Waktu",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextSecondary
+                            )
+                            Text(
+                                text = onTimeCount.toString(),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = StatusGreen
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = StatusRed,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "Terlambat",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextSecondary
+                            )
+                            Text(
+                                text = overdueCount.toString(),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = StatusRed
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Book List
+            if (transactions.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = StatusGreen,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Tidak ada buku yang perlu dikembalikan",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = TextSecondary
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 100.dp)
+                ) {
+                    items(transactions) { item ->
+                        ReturnBookCard(
+                            item = item,
+                            isAdmin = isAdmin,
+                            onReturnClick = {
+                                if (isAdmin) {
+                                    showConditionDialog = item
+                                } else {
+                                    viewModel.returnBook(item)
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 
+    // Condition Dialog for Admin
     if (showConditionDialog != null) {
         ReturnConditionDialog(
             item = showConditionDialog!!,
@@ -100,67 +286,157 @@ fun ReturnBookScreen() {
         )
     }
 
+    // State Dialogs
     when (val state = borrowState) {
         is BorrowState.Error -> {
             AlertDialog(
                 onDismissRequest = viewModel::dismissState,
-                title = { Text("Error") },
-                text = { Text(state.message) },
+                title = { Text("Error", color = TextPrimary) },
+                text = { Text(state.message, color = TextSecondary) },
                 confirmButton = {
-                    TextButton(onClick = viewModel::dismissState) { Text("OK") }
-                }
+                    TextButton(onClick = viewModel::dismissState) {
+                        Text("OK", color = PurpleAccent)
+                    }
+                },
+                containerColor = DarkSurface
             )
         }
         is BorrowState.Success -> {
-           AlertDialog(
+            AlertDialog(
                 onDismissRequest = viewModel::dismissState,
-                title = { Text("Berhasil") },
-                text = { Text(state.message) },
+                title = { Text("Berhasil", color = StatusGreen) },
+                text = { Text(state.message, color = TextSecondary) },
                 confirmButton = {
-                    TextButton(onClick = viewModel::dismissState) { Text("OK") }
-                }
+                    TextButton(onClick = viewModel::dismissState) {
+                        Text("OK", color = PurpleAccent)
+                    }
+                },
+                containerColor = DarkSurface
             )
         }
-        BorrowState.Loading -> {
-             // Optional: Show loading indicator
-        }
+        BorrowState.Loading -> { /* Loading indicator */ }
         BorrowState.Idle -> {}
     }
 }
 
 @Composable
-fun ReturnItemCard(item: TransactionWithBook, isAdmin: Boolean, onReturnClick: () -> Unit) {
+private fun ReturnBookCard(
+    item: TransactionWithBook,
+    isAdmin: Boolean,
+    onReturnClick: () -> Unit
+) {
     val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     val dueDateStr = dateFormat.format(Date(item.transaction.dueDate))
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(item.book.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                if (item.borrowerName != null) {
-                    Text("Peminjam: ${item.borrowerName}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.tertiary)
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("Batas Waktu: $dueDateStr", style = MaterialTheme.typography.bodyMedium)
-                if (item.fineEstimate > 0) {
-                     Text("Estimasi Denda: Rp ${item.fineEstimate.toInt()}", color = MaterialTheme.colorScheme.error)
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = onReturnClick,
-                colors = if (isAdmin) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) else ButtonDefaults.buttonColors()
-            ) {
-                Text(if (isAdmin) "Denda" else "Kembalikan")
-            }
-        }
+    val isOverdue = item.fineEstimate > 0
+    
+    // Calculate days remaining/overdue
+    val currentTime = System.currentTimeMillis()
+    val daysRemaining = TimeUnit.MILLISECONDS.toDays(item.transaction.dueDate - currentTime)
+    val progress = if (daysRemaining >= 0) {
+        // Assuming 14 days loan period
+        (14 - daysRemaining).toFloat() / 14f
+    } else {
+        1f
     }
+
+    LiquidGlassBookCard(
+        title = item.book.title,
+        author = item.borrowerName?.let { "Peminjam: $it" } ?: "",
+        coverContent = {
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = if (isOverdue) {
+                                listOf(StatusRed.copy(alpha = 0.8f), StatusOrange.copy(alpha = 0.8f))
+                            } else {
+                                listOf(PurpleAccent, BlueAccent)
+                            }
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Book,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        },
+        additionalInfo = {
+            Column {
+                // Due date
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = null,
+                        tint = TextTertiary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = dueDateStr,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Progress bar
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    DeadlineProgressBar(
+                        progress = progress,
+                        isOverdue = isOverdue,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    Text(
+                        text = if (daysRemaining >= 0) {
+                            "${daysRemaining} hari tersisa"
+                        } else {
+                            "terlambat ${-daysRemaining} hari"
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isOverdue) StatusRed else StatusGreen
+                    )
+                }
+                
+                // Fine estimate
+                if (item.fineEstimate > 0) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Estimasi Denda: Rp ${item.fineEstimate.toInt()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = StatusRed
+                    )
+                }
+            }
+        },
+        statusBadge = {
+            StatusBadge(
+                text = if (isOverdue) "Terlambat" else "Tepat Waktu",
+                color = if (isOverdue) StatusRed else StatusGreen
+            )
+        },
+        trailingContent = {
+            LiquidGlassButton(
+                text = if (isAdmin) "Denda" else "Kembalikan",
+                onClick = onReturnClick,
+                isDestructive = isAdmin
+            )
+        }
+    )
 }
 
 @Composable
@@ -169,7 +445,6 @@ fun ReturnConditionDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
-    // Map of Display Name to Condition Key
     val options = listOf(
         "Rusak (Denda Rp 100.000)" to "Rusak",
         "Hilang (Denda Rp 150.000)" to "Hilang",
@@ -179,25 +454,39 @@ fun ReturnConditionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Pilih Kondisi Denda") },
+        title = { 
+            Text(
+                "Pilih Kondisi Denda",
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold
+            ) 
+        },
         text = {
             Column {
-                Text("Pilih alasan denda untuk buku ini:")
-                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Pilih alasan denda untuk buku ini:",
+                    color = TextSecondary
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 options.forEach { (displayName, key) ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                             .fillMaxWidth()
-                             .padding(vertical = 4.dp)
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
                     ) {
                         RadioButton(
                             selected = (key == selectedOption.second),
-                            onClick = { selectedOption = displayName to key }
+                            onClick = { selectedOption = displayName to key },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = PurpleAccent,
+                                unselectedColor = TextTertiary
+                            )
                         )
                         Text(
                             text = displayName,
                             style = MaterialTheme.typography.bodyLarge,
+                            color = TextPrimary,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -205,16 +494,16 @@ fun ReturnConditionDialog(
             }
         },
         confirmButton = {
-            TextButton(
-                onClick = { onConfirm(selectedOption.second) }
-            ) {
-                Text("Konfirmasi Denda")
+            TextButton(onClick = { onConfirm(selectedOption.second) }) {
+                Text("Konfirmasi Denda", color = StatusRed, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Batal")
+                Text("Batal", color = TextSecondary)
             }
-        }
+        },
+        containerColor = DarkSurface,
+        shape = RoundedCornerShape(24.dp)
     )
 }
