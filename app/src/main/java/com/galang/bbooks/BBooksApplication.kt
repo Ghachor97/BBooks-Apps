@@ -18,7 +18,7 @@ class BBooksApplication : Application() {
             .fallbackToDestructiveMigration()
             .build()
         
-        private val userPreferences = UserPreferences(context)
+        val userPreferences = UserPreferences(context)
         
         val userRepository = UserRepository(db.userDao(), userPreferences)
         val bookRepository = BookRepository(db.bookDao())

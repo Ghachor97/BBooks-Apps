@@ -52,6 +52,18 @@ val GradientStart = PurpleAccent
 val GradientEnd = BlueAccent
 
 // ========================================
+// Light Theme - Liquid Glass Palette
+// ========================================
+
+val LightBackground = Color(0xFFF5F5F7)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceVariant = Color(0xFFEEEEEE)
+val LightTextPrimary = Color(0xFF1A1A1A)
+val LightTextSecondary = Color(0xFF5A5A5A)
+val LightGlassWhite = Color(0x99FFFFFF) // More opaque for light mode
+val LightGlassBorder = Color(0x1A000000) // Dark border
+
+// ========================================
 // Legacy Pastel Colors (for fallback)
 // ========================================
 val PastelBlue = Color(0xFFE3F2FD)

@@ -23,6 +23,12 @@ import com.galang.bbooks.ui.screens.RegisterScreen
 import com.galang.bbooks.ui.theme.BBooksTheme
 import kotlinx.coroutines.runBlocking
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.galang.bbooks.ui.viewmodel.ThemeViewModel
+import com.galang.bbooks.ui.viewmodel.ThemeViewModelFactory
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +45,12 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            BBooksTheme {
+            val themeViewModel: ThemeViewModel = viewModel(
+                factory = ThemeViewModelFactory(app.container.userPreferences)
+            )
+            val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+
+            BBooksTheme(darkTheme = isDarkTheme) {
                 val navController = rememberNavController()
                 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -116,6 +127,10 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onManageBooks = {
                                     navController.navigate(Screen.ManageBooks.route)
+                                },
+                                isDarkTheme = isDarkTheme,
+                                onThemeChange = { isDark ->
+                                    themeViewModel.toggleTheme(isDark)
                                 }
                             )
                         }

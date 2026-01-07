@@ -45,30 +45,57 @@ private val LiquidGlassDarkScheme = darkColorScheme(
     outlineVariant = GlassWhite
 )
 
-// Light scheme kept for potential future use
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+// Liquid Glass Light Color Scheme
+private val LiquidGlassLightScheme = lightColorScheme(
+    primary = PurpleAccent,
+    onPrimary = Color.White,
+    primaryContainer = PurpleLight,
+    onPrimaryContainer = PurpleDark,
+    
+    secondary = BlueAccent,
+    onSecondary = Color.White,
+    secondaryContainer = LightSurfaceVariant,
+    onSecondaryContainer = LightTextPrimary,
+    
+    tertiary = StatusOrange,
+    onTertiary = Color.White,
+    
+    background = LightBackground,
+    onBackground = LightTextPrimary,
+    
+    surface = LightSurface,
+    onSurface = LightTextPrimary,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightTextSecondary,
+    
+    error = StatusRed,
+    onError = Color.White,
+    errorContainer = StatusRedLight,
+    onErrorContainer = Color.White,
+    
+    outline = LightGlassBorder,
+    outlineVariant = LightGlassWhite
 )
 
 @Composable
 fun BBooksTheme(
-    darkTheme: Boolean = true, // Force dark theme for Liquid Glass
-    dynamicColor: Boolean = false, // Disable dynamic color to use our custom palette
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false, // Disable dynamic to use custom schemes
     content: @Composable () -> Unit
 ) {
-    // Always use Liquid Glass dark scheme
-    val colorScheme = LiquidGlassDarkScheme
+    val colorScheme = if (darkTheme) LiquidGlassDarkScheme else LiquidGlassLightScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = DarkBackground.toArgb()
-            window.navigationBarColor = DarkBackground.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
+            window.statusBarColor = colorScheme.background.toArgb()
+            window.navigationBarColor = colorScheme.background.toArgb()
+            
+            // If light theme, use dark icons
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

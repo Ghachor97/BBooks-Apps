@@ -51,7 +51,13 @@ import com.galang.bbooks.ui.components.LiquidGlassCard
 import com.galang.bbooks.ui.theme.*
 
 @Composable
-fun ProfileScreen(onBack: () -> Unit, onLogout: () -> Unit, onManageBooks: () -> Unit) {
+fun ProfileScreen(
+    onBack: () -> Unit,
+    onLogout: () -> Unit,
+    onManageBooks: () -> Unit,
+    isDarkTheme: Boolean,
+    onThemeChange: (Boolean) -> Unit
+) {
     val context = LocalContext.current
     val app = context.applicationContext as BBooksApplication
     val user = app.userRepository.currentUser
@@ -319,6 +325,8 @@ fun ProfileScreen(onBack: () -> Unit, onLogout: () -> Unit, onManageBooks: () ->
     // Settings Dialog
     if (showSettingsDialog) {
         SettingsDialog(
+            isDarkTheme = isDarkTheme,
+            onThemeChange = onThemeChange,
             onDismiss = { showSettingsDialog = false }
         )
     }
@@ -399,10 +407,12 @@ private fun MenuOptionCard(
 
 @Composable
 private fun SettingsDialog(
+    isDarkTheme: Boolean,
+    onThemeChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     var notificationsEnabled by remember { mutableStateOf(true) }
-    var darkModeEnabled by remember { mutableStateOf(true) }
+    // Removed local darkModeEnabled state
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -430,8 +440,8 @@ private fun SettingsDialog(
                 SettingsToggleItem(
                     title = "Mode Gelap",
                     subtitle = "Menggunakan tema gelap",
-                    isEnabled = darkModeEnabled,
-                    onToggle = { darkModeEnabled = it }
+                    isEnabled = isDarkTheme,
+                    onToggle = onThemeChange
                 )
 
                 // App Version
