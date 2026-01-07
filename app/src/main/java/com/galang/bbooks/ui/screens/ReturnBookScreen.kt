@@ -401,9 +401,9 @@ private fun ReturnBookCard(
                     
                     Text(
                         text = if (daysRemaining >= 0) {
-                            "${daysRemaining}d tersisa"
+                            "${daysRemaining} hari tersisa"
                         } else {
-                            "${-daysRemaining}d terlambat"
+                            "terlambat ${-daysRemaining} hari"
                         },
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
@@ -425,7 +425,7 @@ private fun ReturnBookCard(
         },
         statusBadge = {
             StatusBadge(
-                text = if (isOverdue) "Terlambat" else "On Time",
+                text = if (isOverdue) "Terlambat" else "Tepat Waktu",
                 color = if (isOverdue) StatusRed else StatusGreen
             )
         },

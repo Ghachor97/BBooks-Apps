@@ -118,18 +118,17 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                        contentDescription = "Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(50.dp)
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(id = com.galang.bbooks.R.drawable.app_logo),
+                        contentDescription = "App Logo",
+                        modifier = Modifier.size(60.dp).clip(CircleShape)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Welcome Back!",
+                    text = "Selamat Datang!",
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 32.sp
@@ -137,7 +136,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                     color = TextPrimary
                 )
                 Text(
-                    text = "Sign in to continue reading",
+                    text = "Masuk untuk lanjut membaca",
                     style = MaterialTheme.typography.bodyLarge,
                     color = TextSecondary
                 )
@@ -156,7 +155,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                         OutlinedTextField(
                             value = viewModel.username,
                             onValueChange = { viewModel.username = it },
-                            label = { Text("Username", color = TextSecondary) },
+                            label = { Text("Nama Pengguna", color = TextSecondary) },
                             leadingIcon = { 
                                 Icon(
                                     Icons.Default.Person, 
@@ -186,7 +185,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                         OutlinedTextField(
                             value = viewModel.password,
                             onValueChange = { viewModel.password = it },
-                            label = { Text("Password", color = TextSecondary) },
+                            label = { Text("Kata Sandi", color = TextSecondary) },
                             leadingIcon = { 
                                 Icon(
                                     Icons.Default.Lock, 
@@ -198,7 +197,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                     Icon(
                                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                        contentDescription = if (passwordVisible) "Sembunyikan kata sandi" else "Tampilkan kata sandi",
                                         tint = TextTertiary
                                     )
                                 }
@@ -265,7 +264,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                                     modifier = Modifier.fillMaxSize()
                                 ) {
                                     Text(
-                                        text = "Login",
+                                        text = "Masuk",
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.Bold
                                         ),
@@ -281,11 +280,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                 
                 TextButton(onClick = onRegisterClick) {
                     Text(
-                        text = "Don't have an account? ",
+                        text = "Belum punya akun? ",
                         color = TextSecondary
                     )
                     Text(
-                        text = "Sign Up",
+                        text = "Daftar",
                         color = PurpleAccent,
                         fontWeight = FontWeight.Bold
                     )

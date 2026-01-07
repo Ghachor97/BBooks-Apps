@@ -273,7 +273,7 @@ fun ProfileScreen(
                             tint = Color.White
                         )
                         Text(
-                            text = "Logout",
+                            text = "Keluar",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White

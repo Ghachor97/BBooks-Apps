@@ -28,7 +28,7 @@ sealed class BottomNavItem(
     val title: String,
     val icon: ImageVector
 ) {
-    data object Dashboard : BottomNavItem(Screen.Main.Dashboard.route, "Dashboard", Icons.Default.Dashboard)
+    data object Dashboard : BottomNavItem(Screen.Main.Dashboard.route, "Beranda", Icons.Default.Dashboard)
     data object BookList : BottomNavItem(Screen.Main.BookList.route, "Buku", Icons.Default.Book)
     data object Return : BottomNavItem(Screen.Main.ReturnBook.route, "Pengembalian", Icons.Default.CheckCircle)
     data object History : BottomNavItem(Screen.Main.History.route, "Riwayat", Icons.Default.History)

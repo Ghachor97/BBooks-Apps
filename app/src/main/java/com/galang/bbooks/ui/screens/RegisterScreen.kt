@@ -124,18 +124,17 @@ fun RegisterScreen(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.PersonAdd,
-                        contentDescription = "Register",
-                        tint = Color.White,
-                        modifier = Modifier.size(50.dp)
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(id = com.galang.bbooks.R.drawable.app_logo),
+                        contentDescription = "App Logo",
+                        modifier = Modifier.size(60.dp).clip(CircleShape)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Create Account",
+                    text = "Buat Akun",
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 32.sp
@@ -143,7 +142,7 @@ fun RegisterScreen(
                     color = TextPrimary
                 )
                 Text(
-                    text = "Join our reading community!",
+                    text = "Bergabung dengan komunitas pembaca kami!",
                     style = MaterialTheme.typography.bodyLarge,
                     color = TextSecondary
                 )
@@ -162,7 +161,7 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = viewModel.fullName,
                             onValueChange = { viewModel.fullName = it },
-                            label = { Text("Full Name", color = TextSecondary) },
+                            label = { Text("Nama Lengkap", color = TextSecondary) },
                             leadingIcon = { 
                                 Icon(
                                     Icons.Default.Badge, 
@@ -192,7 +191,7 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = viewModel.username,
                             onValueChange = { viewModel.username = it },
-                            label = { Text("Username", color = TextSecondary) },
+                            label = { Text("Nama Pengguna", color = TextSecondary) },
                             leadingIcon = { 
                                 Icon(
                                     Icons.Default.Person, 
@@ -222,7 +221,7 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = viewModel.password,
                             onValueChange = { viewModel.password = it },
-                            label = { Text("Password", color = TextSecondary) },
+                            label = { Text("Kata Sandi", color = TextSecondary) },
                             leadingIcon = { 
                                 Icon(
                                     Icons.Default.Lock, 
@@ -234,7 +233,7 @@ fun RegisterScreen(
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                     Icon(
                                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                        contentDescription = if (passwordVisible) "Sembunyikan kata sandi" else "Tampilkan kata sandi",
                                         tint = TextTertiary
                                     )
                                 }
@@ -296,7 +295,7 @@ fun RegisterScreen(
                                     modifier = Modifier.fillMaxSize()
                                 ) {
                                     Text(
-                                        text = "Sign Up",
+                                        text = "Daftar",
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.Bold
                                         ),
@@ -312,11 +311,11 @@ fun RegisterScreen(
                 
                 TextButton(onClick = onLoginClick) {
                     Text(
-                        text = "Already have an account? ",
+                        text = "Sudah punya akun? ",
                         color = TextSecondary
                     )
                     Text(
-                        text = "Login",
+                        text = "Masuk",
                         color = PurpleAccent,
                         fontWeight = FontWeight.Bold
                     )

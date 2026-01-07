@@ -253,7 +253,7 @@ private fun BookItemCard(
     
     LiquidGlassBookCard(
         title = book.title,
-        author = "by ${book.author}",
+        author = "karya ${book.author}",
         onClick = onClick,
         coverContent = {
             // Book cover with gradient

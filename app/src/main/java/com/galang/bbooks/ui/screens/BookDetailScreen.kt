@@ -165,7 +165,7 @@ fun BookDetailScreen(bookId: Long, onBack: () -> Unit) {
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "by ${b.author}",
+                            text = "karya ${b.author}",
                             style = MaterialTheme.typography.titleMedium,
                             color = TextSecondary
                         )
@@ -199,7 +199,7 @@ fun BookDetailScreen(bookId: Long, onBack: () -> Unit) {
                                 color = TextPrimary
                             )
                             Text(
-                                text = "(1,245 reviews)",
+                                text = "(1,245 ulasan)",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextTertiary
                             )

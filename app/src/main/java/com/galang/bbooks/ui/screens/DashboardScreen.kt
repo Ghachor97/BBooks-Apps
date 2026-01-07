@@ -54,12 +54,13 @@ fun DashboardScreen() {
     val context = LocalContext.current
     val app = context.applicationContext as BBooksApplication
     val viewModel: DashboardViewModel = viewModel(
-        factory = DashboardViewModelFactory(app.bookRepository, app.transactionRepository)
+        factory = DashboardViewModelFactory(app.bookRepository, app.transactionRepository, app.userRepository)
     )
     val user = app.userRepository.currentUser
 
     val totalBooks by viewModel.totalBooks.collectAsState()
     val availableBooks by viewModel.availableBooks.collectAsState()
+    val recentActivity by viewModel.recentActivity.collectAsState()
 
     Box(
         modifier = Modifier
@@ -96,12 +97,12 @@ fun DashboardScreen() {
             ) {
                 Column {
                     Text(
-                        text = "Hello,",
+                        text = "Halo,",
                         style = MaterialTheme.typography.titleMedium,
                         color = TextSecondary
                     )
                     Text(
-                        text = user?.fullName ?: "Reader!",
+                        text = user?.fullName ?: "Pembaca!",
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                         color = TextPrimary
                     )
@@ -117,7 +118,7 @@ fun DashboardScreen() {
 
             // Overview Section
             Text(
-                text = "Overview",
+                text = "Ringkasan",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = TextPrimary,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -159,24 +160,25 @@ fun DashboardScreen() {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    ActivityTimelineItem(
-                        title = "Pinjam: \"The Midnight Library\"",
-                        subtitle = "2 jam yang lalu",
-                        icon = Icons.Default.MenuBook,
-                        iconColor = PurpleAccent
-                    )
-                    ActivityTimelineItem(
-                        title = "Kembali: \"Sapiens\"",
-                        subtitle = "Kemarin",
-                        icon = Icons.Default.Refresh,
-                        iconColor = StatusGreen
-                    )
-                    ActivityTimelineItem(
-                        title = "Pinjam: \"Dune\"",
-                        subtitle = "3 hari yang lalu",
-                        icon = Icons.Default.MenuBook,
-                        iconColor = PurpleAccent
-                    )
+                    if (recentActivity.isEmpty()) {
+                         Text(
+                             text = "Belum ada aktivitas",
+                             style = MaterialTheme.typography.bodyMedium,
+                             color = TextSecondary,
+                             modifier = Modifier.padding(8.dp)
+                         )
+                    } else {
+                        val dateFormat = java.text.SimpleDateFormat("dd MMM, HH:mm", java.util.Locale.getDefault())
+                        recentActivity.forEach { item ->
+                            val isReturned = item.transaction.status == "returned"
+                            ActivityTimelineItem(
+                                title = "${if (isReturned) "Kembali" else "Pinjam"}: ${item.book.title}",
+                                subtitle = dateFormat.format(java.util.Date(item.transaction.borrowDate)),
+                                icon = if (isReturned) Icons.Default.Refresh else Icons.Default.MenuBook,
+                                iconColor = if (isReturned) StatusGreen else PurpleAccent
+                            )
+                        }
+                    }
                 }
             }
 
@@ -226,12 +228,12 @@ fun DashboardScreen() {
                 ) {
                     Column {
                         Text(
-                            text = "Discover New Worlds",
+                            text = "Jelajahi Dunia Baru",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = TextPrimary
                         )
                         Text(
-                            text = "Check out our latest collection!",
+                            text = "Cek koleksi terbaru kami!",
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextSecondary
                         )
