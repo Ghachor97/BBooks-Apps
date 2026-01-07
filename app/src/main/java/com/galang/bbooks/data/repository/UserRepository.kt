@@ -2,6 +2,7 @@ package com.galang.bbooks.data.repository
 
 import com.galang.bbooks.data.User
 import com.galang.bbooks.data.UserDao
+import kotlinx.coroutines.flow.Flow
 
 class UserRepository(private val userDao: UserDao) {
     var currentUser: User? = null
@@ -20,6 +21,8 @@ class UserRepository(private val userDao: UserDao) {
         currentUser = null
     }
 
+    val allUsers: Flow<List<User>> = userDao.getAllUsers()
+    
     suspend fun register(user: User) {
         userDao.insertUser(user)
     }

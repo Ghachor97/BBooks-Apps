@@ -12,6 +12,9 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE username = :username")
     suspend fun getUserByUsername(username: String): User?
 
+    @Query("SELECT * FROM users")
+    fun getAllUsers(): Flow<List<User>>
+
     @Insert
     suspend fun insertUser(user: User)
 }
@@ -41,6 +44,9 @@ interface BookDao {
 interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE userId = :userId")
     fun getTransactionsByUser(userId: Int): Flow<List<Transaction>>
+
+    @Query("SELECT * FROM transactions")
+    fun getAllTransactions(): Flow<List<Transaction>>
 
     @Insert
     suspend fun insertTransaction(transaction: Transaction)

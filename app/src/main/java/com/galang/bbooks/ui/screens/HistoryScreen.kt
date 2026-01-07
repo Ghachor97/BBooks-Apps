@@ -78,7 +78,12 @@ fun HistoryItemCard(item: TransactionWithBook) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(item.book.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Column(modifier = Modifier.weight(1f)) {
+                     Text(item.book.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                     if (item.borrowerName != null) {
+                        Text("Peminjam: ${item.borrowerName}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.tertiary)
+                     }
+                }
                 Text(
                     statusText,
                     color = statusColor,
@@ -92,6 +97,9 @@ fun HistoryItemCard(item: TransactionWithBook) {
                 Text("Tanggal Kembali: $returnDateStr")
                 if (item.transaction.fine > 0) {
                      Text("Denda: Rp ${item.transaction.fine.toInt()}", color = MaterialTheme.colorScheme.error)
+                }
+                if (item.transaction.returnCondition != null) {
+                    Text("Kondisi: ${item.transaction.returnCondition}", style = MaterialTheme.typography.bodySmall)
                 }
             } else {
                  val dateFormatFull = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())

@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import com.galang.bbooks.data.Book
+import com.galang.bbooks.data.Transaction
+import com.galang.bbooks.data.User
 
 class HistoryViewModel(
     private val transactionRepository: TransactionRepository,
@@ -20,15 +23,17 @@ class HistoryViewModel(
     private val _currentUser = userRepository.currentUser
     
     val history: StateFlow<List<TransactionWithBook>> = combine(
-        transactionRepository.getTransactionsByUser(_currentUser?.id ?: -1),
-        bookRepository.allBooks
-    ) { transactions, books ->
+        if (_currentUser?.role == "admin") transactionRepository.getAllTransactions() else transactionRepository.getTransactionsByUser(_currentUser?.id ?: -1),
+        bookRepository.allBooks,
+        userRepository.allUsers
+    ) { transactions: List<Transaction>, books: List<Book>, users: List<User> ->
         transactions.sortedByDescending { it.borrowDate }.mapNotNull { transaction ->
             val book = books.find { it.id == transaction.bookId } ?: return@mapNotNull null
             // Fine is stored in transaction if returned, or calculated if active.
             // For history, show stored fine if returned.
             val fine = if (transaction.status == "returned") transaction.fine else 0.0
-            TransactionWithBook(transaction, book, fine)
+            val borrower = users.find { it.id == transaction.userId }
+            TransactionWithBook(transaction, book, fine, borrower?.fullName)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }
