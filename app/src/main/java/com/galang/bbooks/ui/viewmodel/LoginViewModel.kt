@@ -32,7 +32,10 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
             isLoading = true
             loginError = null
             
-            val user = repository.login(username, password)
+            val safeUsername = username.trim()
+            val safePassword = password.trim() // Optional but good for this simple app
+            
+            val user = repository.login(safeUsername, safePassword)
             isLoading = false
             
             if (user != null) {

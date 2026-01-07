@@ -1,7 +1,5 @@
 package com.galang.bbooks.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
@@ -40,15 +39,18 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.galang.bbooks.BBooksApplication
-import com.galang.bbooks.ui.viewmodel.LoginViewModel
-import com.galang.bbooks.ui.viewmodel.LoginViewModelFactory
+import com.galang.bbooks.ui.viewmodel.RegisterViewModel
+import com.galang.bbooks.ui.viewmodel.RegisterViewModelFactory
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
+fun RegisterScreen(
+    onRegisterSuccess: () -> Unit,
+    onLoginClick: () -> Unit
+) {
     val context = LocalContext.current
     val app = context.applicationContext as BBooksApplication
-    val viewModel: LoginViewModel = viewModel(
-        factory = LoginViewModelFactory(app.userRepository)
+    val viewModel: RegisterViewModel = viewModel(
+        factory = RegisterViewModelFactory(app.userRepository)
     )
 
     var passwordVisible by remember { mutableStateOf(false) }
@@ -68,17 +70,28 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Selamat Datang",
+                    text = "Buat Akun",
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Silakan login untuk melanjutkan",
+                    text = "Bergabunglah dengan BBooks",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
+
                 Spacer(modifier = Modifier.height(32.dp))
+
+                OutlinedTextField(
+                    value = viewModel.fullName,
+                    onValueChange = { viewModel.fullName = it },
+                    label = { Text("Nama Lengkap") },
+                    leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
                     value = viewModel.username,
@@ -112,9 +125,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                AnimatedVisibility(visible = viewModel.loginError != null) {
+                if (viewModel.error != null) {
                     Text(
-                        text = viewModel.loginError ?: "",
+                        text = viewModel.error ?: "",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -124,7 +137,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { viewModel.login(onLoginSuccess) },
+                    onClick = { viewModel.register(onRegisterSuccess) },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     enabled = !viewModel.isLoading
                 ) {
@@ -134,14 +147,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Login")
+                        Text("Daftar")
                     }
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                TextButton(onClick = onRegisterClick) {
-                    Text("Belum punya akun? Daftar")
+                TextButton(onClick = onLoginClick) {
+                    Text("Sudah punya akun? Login")
                 }
             }
         }
