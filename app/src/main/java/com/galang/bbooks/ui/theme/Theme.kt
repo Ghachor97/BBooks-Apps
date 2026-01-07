@@ -5,49 +5,71 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Liquid Glass Dark Color Scheme
+private val LiquidGlassDarkScheme = darkColorScheme(
+    primary = PurpleAccent,
+    onPrimary = Color.White,
+    primaryContainer = PurpleDark,
+    onPrimaryContainer = PurpleLight,
+    
+    secondary = BlueAccent,
+    onSecondary = Color.White,
+    secondaryContainer = DarkSurfaceVariant,
+    onSecondaryContainer = TextPrimary,
+    
+    tertiary = StatusOrange,
+    onTertiary = Color.Black,
+    
+    background = DarkBackground,
+    onBackground = TextPrimary,
+    
+    surface = DarkSurface,
+    onSurface = TextPrimary,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = TextSecondary,
+    
+    error = StatusRed,
+    onError = Color.White,
+    errorContainer = StatusRedLight,
+    onErrorContainer = Color.Black,
+    
+    outline = GlassBorder,
+    outlineVariant = GlassWhite
 )
 
+// Light scheme kept for potential future use
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
     tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
 )
 
 @Composable
 fun BBooksTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = true, // Force dark theme for Liquid Glass
+    dynamicColor: Boolean = false, // Disable dynamic color to use our custom palette
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    // Always use Liquid Glass dark scheme
+    val colorScheme = LiquidGlassDarkScheme
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = DarkBackground.toArgb()
+            window.navigationBarColor = DarkBackground.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
+        }
     }
 
     MaterialTheme(

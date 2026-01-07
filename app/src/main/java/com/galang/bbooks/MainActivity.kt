@@ -88,6 +88,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onProfileClick = {
                                     navController.navigate(Screen.Profile.route)
+                                },
+                                onAddBook = {
+                                    navController.navigate(Screen.ManageBooks.route)
                                 }
                             )
                         }
