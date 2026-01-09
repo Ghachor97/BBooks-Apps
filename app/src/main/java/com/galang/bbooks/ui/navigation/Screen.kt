@@ -8,8 +8,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String) {
-    data object Login : Screen("login")
-    data object Register : Screen("register")
+    data object GoogleSignIn : Screen("google_sign_in")
     data object Main : Screen("main") {
         data object Dashboard : Screen("dashboard")
         data object BookList : Screen("book_list")

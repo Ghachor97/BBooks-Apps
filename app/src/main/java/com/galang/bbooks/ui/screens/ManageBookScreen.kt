@@ -66,6 +66,10 @@ import com.galang.bbooks.ui.components.StatusBadge
 import com.galang.bbooks.ui.theme.*
 import com.galang.bbooks.ui.viewmodel.ManageBookViewModel
 import com.galang.bbooks.ui.viewmodel.ManageBookViewModelFactory
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun ManageBookScreen(onBack: () -> Unit) {
@@ -231,8 +235,8 @@ fun ManageBookScreen(onBack: () -> Unit) {
         BookFormDialog(
             title = "Tambah Buku",
             onDismiss = { showAddDialog = false },
-            onConfirm = { title, author, category, stock ->
-                viewModel.addBook(title, author, category, stock)
+            onConfirm = { title, author, category, stock, coverUrl ->
+                viewModel.addBook(title, author, category, stock, coverUrl)
                 showAddDialog = false
             }
         )
@@ -246,9 +250,10 @@ fun ManageBookScreen(onBack: () -> Unit) {
             initialAuthor = book.author,
             initialCategory = book.category,
             initialStock = book.stock,
+            initialCoverUrl = book.coverUrl,
             onDismiss = { showEditDialog = null },
-            onConfirm = { title, author, category, stock ->
-                viewModel.updateBook(book, title, author, category, stock)
+            onConfirm = { title, author, category, stock, coverUrl ->
+                viewModel.updateBook(book, title, author, category, stock, coverUrl)
                 showEditDialog = null
             }
         )
@@ -271,7 +276,7 @@ private fun ManageBookItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Book Icon
+            // Book Cover
             Box(
                 modifier = Modifier
                     .size(50.dp)
@@ -283,12 +288,26 @@ private fun ManageBookItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Book,
-                    contentDescription = null,
-                    tint = PurpleAccent,
-                    modifier = Modifier.size(28.dp)
-                )
+                if (book.coverUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(book.coverUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Cover",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Book,
+                        contentDescription = null,
+                        tint = PurpleAccent,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -341,13 +360,15 @@ private fun BookFormDialog(
     initialAuthor: String = "",
     initialCategory: String = "",
     initialStock: Int = 0,
+    initialCoverUrl: String = "",
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String, Int) -> Unit
+    onConfirm: (String, String, String, Int, String) -> Unit
 ) {
     var titleText by remember { mutableStateOf(initialTitle) }
     var authorText by remember { mutableStateOf(initialAuthor) }
     var categoryText by remember { mutableStateOf(initialCategory) }
     var stockText by remember { mutableStateOf(initialStock.toString()) }
+    var coverUrlText by remember { mutableStateOf(initialCoverUrl) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -389,6 +410,12 @@ private fun BookFormDialog(
                     icon = Icons.Default.Inventory,
                     keyboardType = KeyboardType.Number
                 )
+                FormField(
+                    value = coverUrlText,
+                    onValueChange = { coverUrlText = it },
+                    label = "Link Cover (Google Drive)",
+                    icon = Icons.Default.Link
+                )
             }
         },
         confirmButton = {
@@ -401,7 +428,7 @@ private fun BookFormDialog(
                         )
                     )
                     .clickable {
-                        onConfirm(titleText, authorText, categoryText, stockText.toIntOrNull() ?: 0)
+                        onConfirm(titleText, authorText, categoryText, stockText.toIntOrNull() ?: 0, coverUrlText)
                     }
                     .padding(horizontal = 24.dp, vertical = 12.dp)
             ) {

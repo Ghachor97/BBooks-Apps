@@ -55,6 +55,9 @@ import com.galang.bbooks.ui.components.StatusBadge
 import com.galang.bbooks.ui.theme.*
 import com.galang.bbooks.ui.viewmodel.BookListViewModel
 import com.galang.bbooks.ui.viewmodel.BookListViewModelFactory
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun BookListScreen(onBookClick: (Long) -> Unit, onAddBook: () -> Unit = {}) {
@@ -272,12 +275,26 @@ private fun BookItemCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Book,
-                    contentDescription = null,
-                    tint = if (isAvailable) Color.White.copy(alpha = 0.7f) else TextTertiary,
-                    modifier = Modifier.size(28.dp)
-                )
+                if (book.coverUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(book.coverUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Cover",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Book,
+                        contentDescription = null,
+                        tint = if (isAvailable) Color.White.copy(alpha = 0.7f) else TextTertiary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         },
         additionalInfo = {

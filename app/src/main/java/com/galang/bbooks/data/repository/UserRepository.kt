@@ -12,14 +12,46 @@ class UserRepository(
     var currentUser: User? = null
         private set
 
-    suspend fun login(username: String, passwordHash: String): User? {
-        val user = userDao.getUserByUsername(username)
-        // Mimicking hash check. In real app, passwordHash in DB should be salted hash.
-        return if (user?.passwordHash == passwordHash) {
-            currentUser = user
-            userPreferences.saveUserId(user.id)
-            user
-        } else null
+    companion object {
+        // Admin emails - hardcoded as requested
+        private val ADMIN_EMAILS = setOf(
+            "anarkiboy97@gmail.com",
+            "gustiadityamuzaky08@gmail.com"
+        )
+    }
+
+    /**
+     * Sign in with Google - creates or updates user in local database
+     */
+    suspend fun signInWithGoogle(email: String, displayName: String, photoUrl: String?): User {
+        val role = if (email.lowercase() in ADMIN_EMAILS.map { it.lowercase() }) "admin" else "user"
+        
+        // Check if user exists
+        var user = userDao.getUserByEmail(email)
+        
+        if (user != null) {
+            // Update existing user
+            user = user.copy(
+                fullName = displayName,
+                photoUrl = photoUrl,
+                role = role // Role can change if email is added/removed from admin list
+            )
+            userDao.upsertUser(user)
+        } else {
+            // Create new user
+            user = User(
+                email = email,
+                fullName = displayName,
+                photoUrl = photoUrl,
+                role = role
+            )
+            val newId = userDao.upsertUser(user)
+            user = user.copy(id = newId.toInt())
+        }
+        
+        currentUser = user
+        userPreferences.saveUserId(user.id)
+        return user
     }
 
     fun logout() {
@@ -40,26 +72,14 @@ class UserRepository(
     }
 
     val allUsers: Flow<List<User>> = userDao.getAllUsers()
-    
-    suspend fun register(user: User): Boolean {
-        if (userDao.getUserByUsername(user.username) != null) {
-            return false // Username already exists
-        }
-        userDao.insertUser(user)
-        return true
-    }
 
-    suspend fun ensureAdminExists() {
-        if (userDao.getUserByUsername("admin") == null) {
-            userDao.insertUser(User(username = "admin", passwordHash = "admin", role = "admin", fullName = "Administrator"))
-        }
-        if (userDao.getUserByUsername("user") == null) {
-            userDao.insertUser(User(username = "user", passwordHash = "user", role = "user", fullName = "Anggota Perpustakaan"))
-        }
+    // Helper to fetch user by ID
+    suspend fun getUserById(id: Int): User? {
+        return userDao.getUserById(id)
     }
     
-    // Helper to fetch user by ID for auto-login
-    suspend fun getUserById(id: Int): User? {
-         return userDao.getUserById(id)
+    // Helper to check if current user is admin
+    fun isCurrentUserAdmin(): Boolean {
+        return currentUser?.role == "admin"
     }
 }

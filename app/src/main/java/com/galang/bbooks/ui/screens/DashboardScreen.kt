@@ -109,8 +109,9 @@ fun DashboardScreen() {
                 }
                 
                 AvatarCircle(
-                    initial = user?.username?.firstOrNull()?.toString() ?: "U",
-                    size = 50.dp
+                    initial = user?.fullName?.firstOrNull()?.toString() ?: "U",
+                    size = 50.dp,
+                    photoUrl = user?.photoUrl
                 )
             }
 

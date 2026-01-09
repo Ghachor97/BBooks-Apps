@@ -15,11 +15,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.galang.bbooks.ui.navigation.Screen
 import com.galang.bbooks.ui.screens.BookDetailScreen
-import com.galang.bbooks.ui.screens.LoginScreen
+import com.galang.bbooks.ui.screens.GoogleSignInScreen
 import com.galang.bbooks.ui.screens.MainScreen
 import com.galang.bbooks.ui.screens.ManageBookScreen
 import com.galang.bbooks.ui.screens.ProfileScreen
-import com.galang.bbooks.ui.screens.RegisterScreen
 import com.galang.bbooks.ui.theme.BBooksTheme
 import kotlinx.coroutines.runBlocking
 
@@ -30,13 +29,19 @@ import com.galang.bbooks.ui.viewmodel.ThemeViewModel
 import com.galang.bbooks.ui.viewmodel.ThemeViewModelFactory
 
 class MainActivity : ComponentActivity() {
+    
+    companion object {
+        // Web Client ID from google-services.json (client_type 3)
+        const val WEB_CLIENT_ID = "137620824606-0r2tno4jet8qm7ntgc2pkkm1utfmd098.apps.googleusercontent.com"
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         val app = application as BBooksApplication
         
         // Simple blocking check for auto-login before UI renders
-        var startDestination = Screen.Login.route
+        var startDestination = Screen.GoogleSignIn.route
         runBlocking {
             if (app.userRepository.tryAutoLogin()) {
                 startDestination = Screen.Main.route
@@ -59,30 +64,15 @@ class MainActivity : ComponentActivity() {
                         startDestination = startDestination,
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable(Screen.Login.route) {
-                            LoginScreen(
-                                onLoginSuccess = {
+                        composable(Screen.GoogleSignIn.route) {
+                            GoogleSignInScreen(
+                                onSignInSuccess = {
                                     navController.navigate(Screen.Main.route) {
-                                        popUpTo(Screen.Login.route) { inclusive = true }
+                                        popUpTo(Screen.GoogleSignIn.route) { inclusive = true }
                                     }
                                 },
-                                onRegisterClick = {
-                                    navController.navigate(Screen.Register.route)
-                                }
+                                webClientId = WEB_CLIENT_ID
                             )
-                        }
-                        
-                        composable(Screen.Register.route) {
-                             RegisterScreen(
-                                onRegisterSuccess = {
-                                    navController.navigate(Screen.Main.route) {
-                                         popUpTo(Screen.Register.route) { inclusive = true }
-                                    }
-                                },
-                                onLoginClick = {
-                                    navController.popBackStack()
-                                }
-                             )
                         }
 
                         composable(Screen.Main.route) {
@@ -90,13 +80,7 @@ class MainActivity : ComponentActivity() {
                                 onBookClick = { bookId ->
                                     navController.navigate(Screen.BookDetail.createRoute(bookId))
                                 },
-                                onLogout = { 
-                                     // This callback might be redundant if Profile handles it, 
-                                     // but MainScreen needs to pass it possibly?
-                                     // Let's check MainScreen implementation.
-                                     // It seems MainScreen handles profile navigation internally or via top bar.
-                                     // We will handle navigation mainly here.
-                                },
+                                onLogout = { },
                                 onProfileClick = {
                                     navController.navigate(Screen.Profile.route)
                                 },
@@ -121,7 +105,7 @@ class MainActivity : ComponentActivity() {
                             ProfileScreen(
                                 onBack = { navController.popBackStack() },
                                 onLogout = {
-                                    navController.navigate(Screen.Login.route) {
+                                    navController.navigate(Screen.GoogleSignIn.route) {
                                         popUpTo(0) { inclusive = true }  // Clear entire stack
                                     }
                                 },

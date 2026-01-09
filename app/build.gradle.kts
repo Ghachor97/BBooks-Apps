@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -70,4 +71,19 @@ dependencies {
 
     // Liquid Glass Effect
     implementation(libs.backdrop)
+
+    // Firebase Auth
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    // Google Sign-In with Credential Manager
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    
+    // Legacy Google Sign-In (for MicroG compatibility)
+    implementation(libs.play.services.auth)
+    
+    // Image loading for profile pictures
+    implementation(libs.coil.compose)
 }

@@ -52,6 +52,9 @@ import com.galang.bbooks.ui.theme.*
 import com.galang.bbooks.ui.viewmodel.BookDetailViewModel
 import com.galang.bbooks.ui.viewmodel.BookDetailViewModelFactory
 import com.galang.bbooks.ui.viewmodel.BorrowState
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun BookDetailScreen(bookId: Long, onBack: () -> Unit) {
@@ -118,7 +121,7 @@ fun BookDetailScreen(bookId: Long, onBack: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp)
+                            .height(280.dp)
                             .padding(horizontal = 24.dp)
                             .clip(RoundedCornerShape(24.dp))
                             .background(
@@ -132,19 +135,33 @@ fun BookDetailScreen(bookId: Long, onBack: () -> Unit) {
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Glow effect
-                        Box(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(CircleShape)
-                                .background(PurpleAccent.copy(alpha = 0.2f))
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Book,
-                            contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.8f),
-                            modifier = Modifier.size(80.dp)
-                        )
+                        if (b.coverUrl.isNotBlank()) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(b.coverUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Cover ${b.title}",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(24.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            // Fallback: Glow effect + icon
+                            Box(
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .clip(CircleShape)
+                                    .background(PurpleAccent.copy(alpha = 0.2f))
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Book,
+                                contentDescription = null,
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(80.dp)
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))

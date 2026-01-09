@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "137620824606",
+    "project_id": "bbooks-87e9d",
+    "storage_bucket": "bbooks-87e9d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137620824606:android:f67728e7afe784b9dd840f",
+        "android_client_info": {
+          "package_name": "com.galang.bbooks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "137620824606-icajk0pjpf9eeikgb9k18j1fpeokbp5r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.galang.bbooks",
+            "certificate_hash": "dc38ebade44e0ccd57aa38ff62dc8b92f394cbac"
+          }
+        },
+        {
+          "client_id": "137620824606-0r2tno4jet8qm7ntgc2pkkm1utfmd098.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKdfehq4ou-oaNx7rzsn-Hwqt05JZLE44"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "137620824606-0r2tno4jet8qm7ntgc2pkkm1utfmd098.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

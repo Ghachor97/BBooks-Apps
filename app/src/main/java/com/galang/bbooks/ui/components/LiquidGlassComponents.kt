@@ -302,13 +302,14 @@ fun DeadlineProgressBar(
 }
 
 /**
- * Circular avatar with initial
+ * Circular avatar with initial or photo
  */
 @Composable
 fun AvatarCircle(
     initial: String,
     modifier: Modifier = Modifier,
     size: Dp = 48.dp,
+    photoUrl: String? = null,
     backgroundColor: Color = PurpleAccent
 ) {
     Box(
@@ -322,12 +323,26 @@ fun AvatarCircle(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = initial.uppercase(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
+        if (photoUrl != null) {
+            coil.compose.AsyncImage(
+                model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
+                    .data(photoUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Foto Profil",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
+        } else {
+            Text(
+                text = initial.uppercase(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
     }
 }
 

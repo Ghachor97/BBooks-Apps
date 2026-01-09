@@ -49,6 +49,11 @@ import androidx.compose.ui.unit.sp
 import com.galang.bbooks.BBooksApplication
 import com.galang.bbooks.ui.components.LiquidGlassCard
 import com.galang.bbooks.ui.theme.*
+import com.google.firebase.auth.FirebaseAuth
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun ProfileScreen(
@@ -138,19 +143,33 @@ fun ProfileScreen(
                             .padding(4.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                                .background(DarkSurface),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = user?.fullName?.firstOrNull()?.uppercase() ?: "U",
-                                style = MaterialTheme.typography.displayMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = PurpleAccent
+                        if (user?.photoUrl != null) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(user.photoUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Foto Profil",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
                             )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape)
+                                    .background(DarkSurface),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = user?.fullName?.firstOrNull()?.uppercase() ?: "U",
+                                    style = MaterialTheme.typography.displayMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PurpleAccent
+                                )
+                            }
                         }
                     }
 
@@ -177,7 +196,7 @@ fun ProfileScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "@${user?.username ?: "user"}",
+                                text = user?.email ?: "user@email.com",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = TextSecondary
                             )
@@ -306,6 +325,8 @@ fun ProfileScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showLogoutDialog = false
+                    // Sign out from Firebase
+                    FirebaseAuth.getInstance().signOut()
                     app.userRepository.logout()
                     onLogout()
                 }) {

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.galang.bbooks.data.Book
 import com.galang.bbooks.data.repository.BookRepository
+import com.galang.bbooks.util.GoogleDriveUtils
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -14,21 +15,34 @@ class ManageBookViewModel(private val repository: BookRepository) : ViewModel() 
     val books = repository.allBooks
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun addBook(title: String, author: String, category: String, stock: Int) {
+    fun addBook(title: String, author: String, category: String, stock: Int, coverUrl: String) {
         viewModelScope.launch {
+            // Convert Google Drive URL if necessary
+            val processedCoverUrl = GoogleDriveUtils.convertToDriveDirectUrl(coverUrl)
+            
             repository.addBook(
-                Book(title = title, author = author, category = category, stock = stock, coverUrl = "")
+                Book(
+                    title = title, 
+                    author = author, 
+                    category = category, 
+                    stock = stock, 
+                    coverUrl = processedCoverUrl
+                )
             )
         }
     }
 
-    fun updateBook(book: Book, title: String, author: String, category: String, stock: Int) {
+    fun updateBook(book: Book, title: String, author: String, category: String, stock: Int, coverUrl: String) {
         viewModelScope.launch {
+            // Convert Google Drive URL if necessary
+            val processedCoverUrl = GoogleDriveUtils.convertToDriveDirectUrl(coverUrl)
+            
             repository.updateBook(book.copy(
                 title = title,
                 author = author,
                 category = category,
-                stock = stock
+                stock = stock,
+                coverUrl = processedCoverUrl
             ))
         }
     }
